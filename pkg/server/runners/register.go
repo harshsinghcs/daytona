@@ -40,12 +40,12 @@ func (s *RunnerService) RegisterRunner(ctx context.Context, req services.Registe
 		},
 	}
 
-	err = s.runnerStore.Save(ctx, runner)
+	err = s.runnerMetadataStore.Save(ctx, runner.Metadata)
 	if err != nil {
 		return nil, s.runnerStore.RollbackTransaction(ctx, err)
 	}
 
-	err = s.runnerMetadataStore.Save(ctx, runner.Metadata)
+	err = s.runnerStore.Save(ctx, runner)
 	if err != nil {
 		return nil, s.runnerStore.RollbackTransaction(ctx, err)
 	}

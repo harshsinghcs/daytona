@@ -91,8 +91,16 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 	if err != nil {
 		return s.handleCreateError(ctx, w, err)
 	}
-
 	w.ApiKey = apiKey
+
+	err = s.workspaceMetadataStore.Save(ctx, &models.WorkspaceMetadata{
+		WorkspaceId: w.Id,
+		Uptime:      0,
+		GitStatus:   &models.GitStatus{},
+	})
+	if err != nil {
+		return s.handleCreateError(ctx, w, err)
+	}
 
 	daytonaWorkspaceEnvVars := GetWorkspaceEnvVars(w, WorkspaceEnvVarParams{
 		ApiUrl:           s.serverApiUrl,
@@ -104,15 +112,6 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 	w.EnvVars = util.MergeEnvVars(daytonaWorkspaceEnvVars, w.EnvVars)
 
 	err = s.workspaceStore.Save(ctx, w)
-	if err != nil {
-		return s.handleCreateError(ctx, w, err)
-	}
-
-	err = s.workspaceMetadataStore.Save(ctx, &models.WorkspaceMetadata{
-		WorkspaceId: w.Id,
-		Uptime:      0,
-		GitStatus:   &models.GitStatus{},
-	})
 	if err != nil {
 		return s.handleCreateError(ctx, w, err)
 	}
