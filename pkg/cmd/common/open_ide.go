@@ -13,29 +13,38 @@ import (
 )
 
 func OpenIDE(ideId string, activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, yesFlag bool, gpgKey *string) error {
-	telemetry.AdditionalData["ide"] = ideId
-
+	var err error
 	switch ideId {
 	case "vscode":
-		return ide.OpenVSCode(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
+		err = ide.OpenVSCode(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
 	case "ssh":
-		return ide.OpenTerminalSsh(activeProfile, workspaceId, gpgKey, nil)
+		err = ide.OpenTerminalSsh(activeProfile, workspaceId, gpgKey, nil)
 	case "browser":
-		return ide.OpenBrowserIDE(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
+		err = ide.OpenBrowserIDE(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
 	case "cursor":
-		return ide.OpenCursor(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
+		err = ide.OpenCursor(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
 	case "jupyter":
-		return ide.OpenJupyterIDE(activeProfile, workspaceId, workspaceProviderMetadata, yesFlag, gpgKey)
+		err = ide.OpenJupyterIDE(activeProfile, workspaceId, workspaceProviderMetadata, yesFlag, gpgKey)
 	case "fleet":
-		return ide.OpenFleet(activeProfile, workspaceId, gpgKey)
+		err = ide.OpenFleet(activeProfile, workspaceId, gpgKey)
 	case "zed":
-		return ide.OpenZed(activeProfile, workspaceId, gpgKey)
+		err = ide.OpenZed(activeProfile, workspaceId, gpgKey)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
-			return ide.OpenJetbrainsIDE(activeProfile, ideId, workspaceId, gpgKey)
+			err = ide.OpenJetbrainsIDE(activeProfile, ideId, workspaceId, gpgKey)
+		} else {
+			return errors.New("invalid IDE. Please choose one by running `daytona ide`")
 		}
 	}
 
-	return errors.New("invalid IDE. Please choose one by running `daytona ide`")
+	eventName := telemetry.CliEventWorkspaceOpened
+	if err != nil {
+		eventName = telemetry.CliEventWorkspaceOpenFailed
+	}
+
+	event := telemetry.NewCliEvent(eventName, nil, []string{}, err, map[string]interface{}{"ide": ideId})
+	TrackTelemetryEvent(event, config.GetClientId())
+
+	return err
 }

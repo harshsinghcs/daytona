@@ -17,13 +17,16 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 	log.SetLevel(log.PanicLevel)
 
 	telemetryEnabled := telemetry.TelemetryEnabled(ctx)
-	telemetryProps := map[string]interface{}{
-		"force":     force,
-		"server_id": s.Id,
-	}
 
 	if telemetryEnabled {
-		err := s.TelemetryService.TrackServerEvent(telemetry.ServerEventPurgeStarted, telemetry.ClientId(ctx), telemetryProps)
+		eventName := telemetry.ServerEventPurgeStarted
+		extras := map[string]interface{}{}
+		if force {
+			extras["force"] = true
+		}
+		event := telemetry.NewServerEvent(eventName, s.Id, nil, extras)
+
+		err := s.TelemetryService.Track(event, telemetry.ClientId(ctx))
 		if err != nil {
 			log.Trace(err)
 		}
@@ -91,7 +94,13 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 	}
 
 	if telemetryEnabled {
-		err := s.TelemetryService.TrackServerEvent(telemetry.ServerEventPurgeCompleted, telemetry.ClientId(ctx), telemetryProps)
+		eventName := telemetry.ServerEventPurgeCompleted
+		extras := map[string]interface{}{}
+		if force {
+			extras["force"] = true
+		}
+		event := telemetry.NewServerEvent(eventName, s.Id, nil, extras)
+		err := s.TelemetryService.Track(event, telemetry.ClientId(ctx))
 		if err != nil {
 			log.Trace(err)
 		}
@@ -102,16 +111,20 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 
 func (s *Server) trackPurgeError(ctx context.Context, force bool, err error) {
 	telemetryEnabled := telemetry.TelemetryEnabled(ctx)
-	telemetryProps := map[string]interface{}{
-		"server_id": s.Id,
-		"force":     force,
-		"error":     err.Error(),
+	if !telemetryEnabled {
+		return
 	}
 
-	if telemetryEnabled {
-		err := s.TelemetryService.TrackServerEvent(telemetry.ServerEventPurgeError, telemetry.ClientId(ctx), telemetryProps)
-		if err != nil {
-			log.Trace(err)
-		}
+	extras := map[string]interface{}{}
+	if force {
+		extras["force"] = true
+	}
+
+	eventName := telemetry.ServerEventPurgeError
+	event := telemetry.NewServerEvent(eventName, s.Id, err, extras)
+
+	err = s.TelemetryService.Track(event, telemetry.ClientId(ctx))
+	if err != nil {
+		log.Trace(err)
 	}
 }

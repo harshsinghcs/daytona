@@ -17,6 +17,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
@@ -242,12 +243,12 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 	runnerService := server.GetInstance(nil).RunnerService
 
-	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
+	_, err := runnerService.GetRunner(context.Background(), common.LOCAL_RUNNER_ID)
 	if err != nil {
 		if stores.IsRunnerNotFound(err) {
 			_, err := runnerService.RegisterRunner(context.Background(), services.RegisterRunnerDTO{
-				Id:   bootstrap.LOCAL_RUNNER_ID,
-				Name: bootstrap.LOCAL_RUNNER_ID,
+				Id:   common.LOCAL_RUNNER_ID,
+				Name: common.LOCAL_RUNNER_ID,
 			})
 			if err != nil {
 				return err
@@ -270,8 +271,8 @@ func getLocalRunnerConfig(configDir string) *runner.Config {
 	logFilePath := filepath.Join(configDir, "runner.log")
 
 	return &runner.Config{
-		Id:           bootstrap.LOCAL_RUNNER_ID,
-		Name:         bootstrap.LOCAL_RUNNER_ID,
+		Id:           common.LOCAL_RUNNER_ID,
+		Name:         common.LOCAL_RUNNER_ID,
 		ProvidersDir: providersDir,
 		LogFile:      logs.GetDefaultLogFileConfig(logFilePath),
 	}
@@ -282,7 +283,7 @@ func awaitLocalRunnerStarted() error {
 	startTime := time.Now()
 
 	for {
-		r, err := server.RunnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
+		r, err := server.RunnerService.GetRunner(context.Background(), common.LOCAL_RUNNER_ID)
 		if err != nil {
 			return err
 		}
@@ -305,12 +306,12 @@ func awaitLocalRunnerStarted() error {
 func handleDisabledLocalRunner() error {
 	runnerService := server.GetInstance(nil).RunnerService
 
-	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
+	_, err := runnerService.GetRunner(context.Background(), common.LOCAL_RUNNER_ID)
 	if err != nil {
 		if stores.IsRunnerNotFound(err) {
 			return nil
 		}
 	}
 
-	return runnerService.RemoveRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
+	return runnerService.RemoveRunner(context.Background(), common.LOCAL_RUNNER_ID)
 }

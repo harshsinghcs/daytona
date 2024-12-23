@@ -143,13 +143,13 @@ func (s *WorkspaceService) handleCreateError(ctx context.Context, w *models.Work
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w)
-	event := telemetry.ServerEventWorkspaceCreated
+	eventName := telemetry.WorkspaceEventLifecycleCreated
 	if err != nil {
-		telemetryProps["error"] = err.Error()
-		event = telemetry.ServerEventWorkspaceCreateError
+		eventName = telemetry.WorkspaceEventLifecycleCreationFailed
 	}
-	telemetryError := s.trackTelemetryEvent(event, clientId, telemetryProps)
+	event := telemetry.NewWorkspaceEvent(eventName, w, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
 	if telemetryError != nil {
 		log.Trace(err)
 	}

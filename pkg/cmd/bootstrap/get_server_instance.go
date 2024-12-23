@@ -303,11 +303,13 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				State:        models.JobStatePending,
 			})
 		},
-		ServerApiUrl:     util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-		ServerVersion:    version,
-		ServerUrl:        headscaleUrl,
-		LoggerFactory:    logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetTargetLogsDir(configDir)}),
-		TelemetryService: telemetryService,
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return telemetryService.Track(event, clientId)
+		},
+		ServerApiUrl:  util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+		ServerVersion: version,
+		ServerUrl:     headscaleUrl,
+		LoggerFactory: logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetTargetLogsDir(configDir)}),
 	})
 
 	workspaceService := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
@@ -375,7 +377,9 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				State:        models.JobStatePending,
 			})
 		},
-		TrackTelemetryEvent:   telemetryService.TrackServerEvent,
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return telemetryService.Track(event, clientId)
+		},
 		ServerApiUrl:          util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ServerVersion:         version,
 		ServerUrl:             headscaleUrl,
@@ -433,7 +437,9 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			}
 			return nil
 		},
-		TrackTelemetryEvent: telemetryService.TrackServerEvent,
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return telemetryService.Track(event, clientId)
+		},
 	})
 
 	s := server.GetInstance(&server.ServerInstanceConfig{

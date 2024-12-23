@@ -100,6 +100,10 @@ func GetConfigDir() (string, error) {
 }
 
 func Save(c Config) error {
+	if c.ClientId == "" {
+		c.ClientId = uuid.NewString()
+	}
+
 	if err := util.DirectoryValidator(&c.ProvidersDir); err != nil {
 		return err
 	}
@@ -169,8 +173,9 @@ func GetDefaultConfig() (*Config, error) {
 	}
 
 	c := Config{
-		ProvidersDir: providersDir,
-		LogFile:      logs.GetDefaultLogFileConfig(logFilePath),
+		ProvidersDir:     providersDir,
+		LogFile:          logs.GetDefaultLogFileConfig(logFilePath),
+		TelemetryEnabled: true,
 	}
 
 	if os.Getenv("DEFAULT_PROVIDERS_DIR") != "" {
