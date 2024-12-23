@@ -10,6 +10,7 @@ import (
 )
 
 type TransactionKey struct{}
+type SkipTransactionKey struct{}
 
 type IStore interface {
 	BeginTransaction(ctx context.Context) (context.Context, error)

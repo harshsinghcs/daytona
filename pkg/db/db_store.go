@@ -45,6 +45,10 @@ func (s *dbStore) BeginTransaction(ctx context.Context) (context.Context, error)
 }
 
 func (s *dbStore) CommitTransaction(ctx context.Context) error {
+	if ctx.Value(stores.SkipTransactionKey{}) != nil {
+		return nil
+	}
+
 	tx, ok := ctx.Value(stores.TransactionKey{}).(*gorm.DB)
 	if !ok {
 		return nil
@@ -54,6 +58,10 @@ func (s *dbStore) CommitTransaction(ctx context.Context) error {
 }
 
 func (s *dbStore) RollbackTransaction(ctx context.Context, err error) error {
+	if ctx.Value(stores.SkipTransactionKey{}) != nil {
+		return nil
+	}
+
 	tx, ok := ctx.Value(stores.TransactionKey{}).(*gorm.DB)
 	if !ok {
 		return err
