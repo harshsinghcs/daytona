@@ -2476,6 +2476,9 @@
                 "lastJob": {
                     "$ref": "#/definitions/Job"
                 },
+                "lastJobId": {
+                    "type": "string"
+                },
                 "prebuildId": {
                     "type": "string"
                 },
@@ -3539,6 +3542,9 @@
                 "lastJob": {
                     "$ref": "#/definitions/Job"
                 },
+                "lastJobId": {
+                    "type": "string"
+                },
                 "metadata": {
                     "$ref": "#/definitions/TargetMetadata"
                 },
@@ -3660,6 +3666,9 @@
                 },
                 "lastJob": {
                     "$ref": "#/definitions/Job"
+                },
+                "lastJobId": {
+                    "type": "string"
                 },
                 "metadata": {
                     "$ref": "#/definitions/TargetMetadata"
@@ -3826,6 +3835,9 @@
                 "lastJob": {
                     "$ref": "#/definitions/Job"
                 },
+                "lastJobId": {
+                    "type": "string"
+                },
                 "metadata": {
                     "$ref": "#/definitions/WorkspaceMetadata"
                 },
@@ -3887,6 +3899,9 @@
                 },
                 "lastJob": {
                     "$ref": "#/definitions/Job"
+                },
+                "lastJobId": {
+                    "type": "string"
                 },
                 "metadata": {
                     "$ref": "#/definitions/WorkspaceMetadata"

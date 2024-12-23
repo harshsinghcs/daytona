@@ -21,6 +21,7 @@ type IWorkspaceService interface {
 	RemoveWorkspace(ctx context.Context, workspaceId string) error
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
 	UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error
+	UpdateWorkspaceLastJob(ctx context.Context, workspaceId, jobId string) error
 
 	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
 	GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error)

@@ -15,16 +15,25 @@ import (
 )
 
 type JobServiceConfig struct {
-	JobStore stores.JobStore
+	JobStore               stores.JobStore
+	UpdateWorkspaceLastJob func(ctx context.Context, workspaceId string, jobId string) error
+	UpdateTargetLastJob    func(ctx context.Context, targetId string, jobId string) error
+	UpdateBuildLastJob     func(ctx context.Context, buildId string, jobId string) error
 }
 
 type JobService struct {
-	jobStore stores.JobStore
+	jobStore               stores.JobStore
+	updateWorkspaceLastJob func(ctx context.Context, workspaceId string, jobId string) error
+	updateTargetLastJob    func(ctx context.Context, targetId string, jobId string) error
+	updateBuildLastJob     func(ctx context.Context, buildId string, jobId string) error
 }
 
 func NewJobService(config JobServiceConfig) services.IJobService {
 	return &JobService{
-		jobStore: config.JobStore,
+		jobStore:               config.JobStore,
+		updateWorkspaceLastJob: config.UpdateWorkspaceLastJob,
+		updateTargetLastJob:    config.UpdateTargetLastJob,
+		updateBuildLastJob:     config.UpdateBuildLastJob,
 	}
 }
 
@@ -68,21 +77,47 @@ func (s *JobService) Create(ctx context.Context, j *models.Job) error {
 }
 
 func (s *JobService) SetState(ctx context.Context, jobId string, updateJobStateDto services.UpdateJobStateDTO) error {
+	var err error
+	ctx, err = s.jobStore.BeginTransaction(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer stores.RecoverAndRollback(ctx, s.jobStore)
+
 	job, findErr := s.Find(ctx, &stores.JobFilter{
 		Id: &jobId,
 	})
 	if findErr != nil {
-		return findErr
+		return s.jobStore.RollbackTransaction(ctx, findErr)
 	}
 
 	if job.State == updateJobStateDto.State {
-		return errors.New("job is already in the specified state")
+		return s.jobStore.RollbackTransaction(ctx, errors.New("job is already in the specified state"))
 	}
 
 	job.State = updateJobStateDto.State
 	job.Error = updateJobStateDto.ErrorMessage
 
-	return s.jobStore.Save(ctx, job)
+	err = s.jobStore.Save(ctx, job)
+	if err != nil {
+		return s.jobStore.RollbackTransaction(ctx, err)
+	}
+
+	switch job.ResourceType {
+	case models.ResourceTypeWorkspace:
+		err = s.updateWorkspaceLastJob(ctx, job.ResourceId, job.Id)
+	case models.ResourceTypeTarget:
+		err = s.updateTargetLastJob(ctx, job.ResourceId, job.Id)
+	case models.ResourceTypeBuild:
+		err = s.updateBuildLastJob(ctx, job.ResourceId, job.Id)
+	}
+
+	if err != nil {
+		return s.jobStore.RollbackTransaction(ctx, err)
+	}
+
+	return s.jobStore.CommitTransaction(ctx)
 }
 
 func (s *JobService) Delete(ctx context.Context, j *models.Job) error {

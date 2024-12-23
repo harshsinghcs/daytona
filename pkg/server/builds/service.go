@@ -193,6 +193,19 @@ func (s *BuildService) AwaitEmptyList(ctx context.Context, waitTime time.Duratio
 	}
 }
 
+func (s *BuildService) UpdateBuildLastJob(ctx context.Context, buildId, jobId string) error {
+	b, err := s.buildStore.Find(ctx, &stores.BuildFilter{
+		Id: &buildId,
+	})
+	if err != nil {
+		return err
+	}
+
+	b.LastJobId = &jobId
+
+	return s.buildStore.Save(ctx, b)
+}
+
 func (s *BuildService) GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error) {
 	return s.loggerFactory.CreateLogReader(buildId)
 }

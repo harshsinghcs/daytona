@@ -21,6 +21,7 @@ type ITargetService interface {
 	StopTarget(ctx context.Context, targetId string) error
 	SetDefault(ctx context.Context, targetId string) error
 	UpdateTargetProviderMetadata(ctx context.Context, targetId, metadata string) error
+	UpdateTargetLastJob(ctx context.Context, targetId, jobId string) error
 	RemoveTarget(ctx context.Context, targetId string) error
 	ForceRemoveTarget(ctx context.Context, targetId string) error
 	HandleSuccessfulCreation(ctx context.Context, targetId string) error

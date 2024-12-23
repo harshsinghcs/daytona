@@ -2479,6 +2479,9 @@ const docTemplate = `{
                 "lastJob": {
                     "$ref": "#/definitions/Job"
                 },
+                "lastJobId": {
+                    "type": "string"
+                },
                 "prebuildId": {
                     "type": "string"
                 },
@@ -3542,6 +3545,9 @@ const docTemplate = `{
                 "lastJob": {
                     "$ref": "#/definitions/Job"
                 },
+                "lastJobId": {
+                    "type": "string"
+                },
                 "metadata": {
                     "$ref": "#/definitions/TargetMetadata"
                 },
@@ -3663,6 +3669,9 @@ const docTemplate = `{
                 },
                 "lastJob": {
                     "$ref": "#/definitions/Job"
+                },
+                "lastJobId": {
+                    "type": "string"
                 },
                 "metadata": {
                     "$ref": "#/definitions/TargetMetadata"
@@ -3829,6 +3838,9 @@ const docTemplate = `{
                 "lastJob": {
                     "$ref": "#/definitions/Job"
                 },
+                "lastJobId": {
+                    "type": "string"
+                },
                 "metadata": {
                     "$ref": "#/definitions/WorkspaceMetadata"
                 },
@@ -3890,6 +3902,9 @@ const docTemplate = `{
                 },
                 "lastJob": {
                     "$ref": "#/definitions/Job"
+                },
+                "lastJobId": {
+                    "type": "string"
                 },
                 "metadata": {
                     "$ref": "#/definitions/WorkspaceMetadata"

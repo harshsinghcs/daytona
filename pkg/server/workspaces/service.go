@@ -103,3 +103,14 @@ func (s *WorkspaceService) UpdateWorkspaceProviderMetadata(ctx context.Context, 
 	w.ProviderMetadata = &metadata
 	return s.workspaceStore.Save(ctx, w)
 }
+
+func (s *WorkspaceService) UpdateWorkspaceLastJob(ctx context.Context, workspaceId, jobId string) error {
+	w, err := s.workspaceStore.Find(ctx, workspaceId)
+	if err != nil {
+		return err
+	}
+
+	w.LastJobId = &jobId
+
+	return s.workspaceStore.Save(ctx, w)
+}

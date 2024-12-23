@@ -88,3 +88,16 @@ func (s *TargetService) UpdateTargetProviderMetadata(ctx context.Context, target
 	tg.ProviderMetadata = &metadata
 	return s.targetStore.Save(ctx, tg)
 }
+
+func (s *TargetService) UpdateTargetLastJob(ctx context.Context, targetId, jobId string) error {
+	t, err := s.targetStore.Find(ctx, &stores.TargetFilter{
+		IdOrName: &targetId,
+	})
+	if err != nil {
+		return err
+	}
+
+	t.LastJobId = &jobId
+
+	return s.targetStore.Save(ctx, t)
+}
